@@ -1,0 +1,394 @@
+# A* SEARCH ALGORITHM
+import heapq
+
+
+graph = {
+    "Mumbai": {
+        "Lonavala": 85,
+        "Nashik": 165,
+        "Alibag": 154
+    },
+
+    "Lonavala": {
+        "Mumbai": 85,
+        "Pune": 65
+    },
+
+    "Nashik": {
+        "Mumbai": 165,
+        "Satara": 210
+    },
+
+    "Alibag": {
+        "Mumbai": 154
+    },
+
+    "Pune": {
+        "Lonavala": 65,
+        "Satara": 110
+    },
+
+    "Satara": {}
+}
+
+
+heuristic = {
+    "Mumbai": 260,
+    "Lonavala": 175,
+    "Nashik": 210,
+    "Alibag": 300,
+    "Pune": 110,
+    "Satara": 0
+}
+
+def a_star(start, goal):
+
+    priority_queue = []
+    heapq.heappush(priority_queue, (heuristic[start], 0, start, [start]))
+
+    visited = set()
+
+    while priority_queue:
+
+        f, g, current, path = heapq.heappop(priority_queue)
+
+        if current == goal:
+            return path, g
+
+        if current in visited:
+            continue
+
+        visited.add(current)
+
+        for neighbor, distance in graph[current].items():
+
+            if neighbor not in visited:
+
+                new_g = g + distance
+                new_f = new_g + heuristic[neighbor]
+
+                heapq.heappush(
+                    priority_queue,
+                    (new_f, new_g, neighbor, path + [neighbor])
+                )
+
+    return None, float("inf")
+
+
+start_city = "Mumbai"
+goal_city = "Satara"
+
+path, cost = a_star(start_city, goal_city)
+
+print("===== A* Search =====")
+print("Route Found :", " -> ".join(path))
+print("Total Distance :", cost, "km")
+
+
+
+# A* SEARCH ALGORITHM GRAPH PLOTTING
+import heapq
+import matplotlib.pyplot as plt
+import networkx as nx
+
+
+node_positions = {
+    "Mumbai": (2, 8),
+    "Lonavala": (1, 6),
+    "Nashik": (3, 6),
+    "Alibag": (1, 4),
+    "Pune": (3, 4),
+    "Satara": (2, 2)
+}
+
+
+G = nx.DiGraph()
+
+for city, neighbors in graph.items():
+    for neighbor, distance in neighbors.items():
+        G.add_edge(city, neighbor, weight=distance)
+
+plt.figure(figsize=(10,8))
+
+
+path_edges = list(zip(path, path[1:]))
+
+
+normal_edges = [edge for edge in G.edges() if edge not in path_edges]
+
+
+nx.draw_networkx_nodes(
+    G,
+    node_positions,
+    node_size=2600,
+    node_color="lightblue"
+)
+
+
+nx.draw_networkx_edges(
+    G,
+    node_positions,
+    edgelist=normal_edges,
+    width=1.5,
+    edge_color="gray",
+    arrows=True,
+    arrowsize=18
+)
+
+
+nx.draw_networkx_edges(
+    G,
+    node_positions,
+    edgelist=path_edges,
+    width=3.5,
+    edge_color="darkorange",
+    arrows=True,
+    arrowsize=18
+)
+
+
+labels = {
+    city: f"{city}\nh(n)={heuristic[city]}"
+    for city in G.nodes()
+}
+
+nx.draw_networkx_labels(
+    G,
+    node_positions,
+    labels,
+    font_size=9,
+    font_weight="bold"
+)
+
+
+edge_labels = nx.get_edge_attributes(G, "weight")
+edge_labels = {
+    edge: f"{distance} km"
+    for edge, distance in edge_labels.items()
+}
+
+nx.draw_networkx_edge_labels(
+    G,
+    node_positions,
+    edge_labels=edge_labels,
+    font_color="red",
+    font_size=9
+)
+
+plt.title(
+    "A* Routing Map: Mumbai to Satara\n"
+    "(Highlighted Orange Path = Optimal Route)",
+    fontsize=14,
+    fontweight="bold"
+)
+
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+
+# RECURSIVE BREADTH FIRST SEARCH 
+import math
+
+
+graph = {
+    "Ratnagiri": {
+        "Chiplun": 130
+    },
+
+    "Chiplun": {
+        "Ratnagiri": 130,
+        "Mahad": 90,
+        "Satara": 120
+    },
+
+    "Mahad": {
+        "Chiplun": 90,
+        "Panvel": 75
+    },
+
+    "Satara": {
+        "Chiplun": 120
+    },
+
+    "Panvel": {
+        "Mahad": 75,
+        "Mumbai": 40
+    },
+
+    "Mumbai": {}
+}
+
+heuristic = {
+    "Ratnagiri": 300,
+    "Chiplun": 220,
+    "Mahad": 110,
+    "Satara": 250,
+    "Panvel": 40,
+    "Mumbai": 0
+}
+
+
+
+def rbfs(node, goal, g_cost, f_limit, path):
+
+    if node == goal:
+        return path, g_cost
+
+    successors = []
+
+    for neighbor, distance in graph[node].items():
+
+        if neighbor not in path:
+
+            new_g = g_cost + distance
+            new_f = max(new_g + heuristic[neighbor],
+                        g_cost + heuristic[node])
+
+            successors.append([neighbor, new_g, new_f])
+
+    if len(successors) == 0:
+        return None, math.inf
+
+    while True:
+
+        successors.sort(key=lambda x: x[2])
+
+        best = successors[0]
+
+        if best[2] > f_limit:
+            return None, best[2]
+
+        if len(successors) > 1:
+            alternative = successors[1][2]
+        else:
+            alternative = math.inf
+
+        result, best[2] = rbfs(
+            best[0],
+            goal,
+            best[1],
+            min(f_limit, alternative),
+            path + [best[0]]
+        )
+
+        if result is not None:
+            return result, best[1]
+
+
+
+start_city = "Ratnagiri"
+goal_city = "Mumbai"
+
+path, cost = rbfs(
+    start_city,
+    goal_city,
+    0,
+    math.inf,
+    [start_city]
+)
+
+print("===== Recursive Best-First Search =====")
+print("Route Found :", " -> ".join(path))
+print("Total Distance :", cost, "km")
+
+
+# RECURSIVE BREADTH FIRST SEARCH GRAPH PLOTTING
+import matplotlib.pyplot as plt
+import networkx as nx
+
+
+node_positions = {
+    "Ratnagiri": (2, 8),
+    "Chiplun": (2, 6),
+    "Mahad": (1, 4),
+    "Satara": (3, 4),
+    "Panvel": (2, 2),
+    "Mumbai": (2, 0)
+}
+
+
+G = nx.DiGraph()
+
+for city, neighbors in graph.items():
+    for neighbor, distance in neighbors.items():
+        G.add_edge(city, neighbor, weight=distance)
+
+plt.figure(figsize=(10, 8))
+
+
+path_edges = list(zip(path, path[1:]))
+
+
+normal_edges = [edge for edge in G.edges() if edge not in path_edges]
+
+
+nx.draw_networkx_nodes(
+    G,
+    node_positions,
+    node_size=2600,
+    node_color="lightblue"
+)
+
+
+nx.draw_networkx_edges(
+    G,
+    node_positions,
+    edgelist=normal_edges,
+    width=1.5,
+    edge_color="gray",
+    arrows=True,
+    arrowsize=18
+)
+
+
+nx.draw_networkx_edges(
+    G,
+    node_positions,
+    edgelist=path_edges,
+    width=3.5,
+    edge_color="darkorange",
+    arrows=True,
+    arrowsize=18
+)
+
+
+node_labels = {
+    city: f"{city}\nh(n)={heuristic[city]}"
+    for city in G.nodes()
+}
+
+nx.draw_networkx_labels(
+    G,
+    node_positions,
+    labels=node_labels,
+    font_size=9,
+    font_weight="bold"
+)
+
+
+edge_labels = nx.get_edge_attributes(G, "weight")
+
+formatted_edge_labels = {
+    edge: f"{distance} km"
+    for edge, distance in edge_labels.items()
+}
+
+nx.draw_networkx_edge_labels(
+    G,
+    node_positions,
+    edge_labels=formatted_edge_labels,
+    font_color="red",
+    font_size=9
+)
+
+plt.title(
+    "RBFS Routing Map: Ratnagiri to Mumbai\n"
+    "(Highlighted Orange Path = Optimal Route)",
+    fontsize=14,
+    fontweight="bold"
+)
+
+plt.axis("off")
+plt.tight_layout()
+plt.show()

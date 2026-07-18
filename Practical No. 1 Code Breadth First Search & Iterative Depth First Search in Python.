@@ -1,0 +1,73 @@
+# BREADTH FIRST SEARCH CODE
+from collections import deque
+
+
+graph = {
+    "Mumbai": ["Pune", "Nashik"],
+    "Pune": ["Satara", "Kolhapur"],
+    "Nashik": ["Aurangabad"],
+    "Satara": [],
+    "Kolhapur": [],
+    "Aurangabad": []
+}
+
+def bfs(graph, start):
+    visited = []
+    queue = deque()
+
+    visited.append(start)
+    queue.append(start)
+
+    print("Breadth First Search Traversal:")
+
+    while queue:
+        city = queue.popleft()
+        print(city, end=" ")
+
+        for neighbour in graph[city]:
+            if neighbour not in visited:
+                visited.append(neighbour)
+                queue.append(neighbour)
+
+
+start_city = "Mumbai"
+bfs(graph, start_city)
+
+
+
+
+
+# ITERATIVE DEPTH FIRST SEARCH CODE
+
+graph = {
+    "Mumbai": ["Pune", "Nashik"],
+    "Pune": ["Satara", "Kolhapur"],
+    "Nashik": ["Aurangabad"],
+    "Satara": [],
+    "Kolhapur": [],
+    "Aurangabad": []
+}
+
+def dfs(graph, start):
+    visited = []
+    stack = []
+
+    stack.append(start)
+
+    print("Iterative Depth First Search Traversal:")
+
+    while stack:
+        city = stack.pop()
+
+        if city not in visited:
+            print(city, end=" ")
+            visited.append(city)
+
+
+            for neighbour in reversed(graph[city]):
+                if neighbour not in visited:
+                    stack.append(neighbour)
+
+
+start_city = "Mumbai"
+dfs(graph, start_city)

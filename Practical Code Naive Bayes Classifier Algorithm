@@ -1,0 +1,103 @@
+# NAIVE BAYES CLASSIFIER ALGORITHM
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+dataset = pd.read_csv('iris.csv')
+X = dataset.iloc[:, [0,3]].values
+y = dataset.iloc[:, -1].values
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20, random_state = 0)
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+from sklearn.naive_bayes import GaussianNB
+classifier = GaussianNB()
+classifier.fit(X_train, y_train)
+
+y_pred = classifier.predict(X_test)
+print("Predicted Test Results: ", y_pred)
+print("~"*20)
+
+from sklearn.metrics import confusion_matrix, accuracy_score
+ac = accuracy_score(y_test,y_pred)
+print("Model Accuracy: ", ac*100, "%")
+print("~"*20)
+cm = confusion_matrix(y_test, y_pred)
+print("Model Confusion Matrix: ")
+print(cm)
+
+
+# The problem statement is to classify patients as diabetic or non-diabetic.
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn import metrics
+
+print("Libraries Imported")
+
+# Since it is a data file with no header
+import pandas as pd
+
+pima_df = pd.read_csv("diabetes.csv")
+print(pima_df)
+
+print("Dataset Loaded")
+
+# Initialized predictor variables and the target that is X and Y respectively.
+X = pima_df.drop('class', axis=1)
+y = pima_df['class']
+
+#  Transformed the data using StandardScaler.
+from sklearn.preprocessing import StandardScaler
+std = StandardScaler()
+X = std.fit_transform(X)
+print("Transformed Data ")
+print(X)
+
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.30,
+    random_state=7
+)
+
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+print(model)
+
+# The Model has been trained
+predicted = model.predict(X_test)
+print(predicted)
+
+# Result Diagnosis
+from sklearn.metrics import accuracy_score, confusion_matrix
+metrics.confusion_matrix(predicted, y_test)
+
+model_score = model.score(X_test, y_test)
+model_score
+
+from sklearn.metrics import auc, roc_curve
+fpr, tpr, thresholds = roc_curve(y_test, predicted)
+roc_auc = auc(fpr, tpr)
+roc_auc
+
+
+# Plot ROC Curve
+import matplotlib.pyplot as plt
+plt.plot(fpr, tpr, color='darkorange', label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")

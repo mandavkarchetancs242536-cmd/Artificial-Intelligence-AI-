@@ -1,0 +1,69 @@
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+
+df = pd.read_csv("Market_Basket_Optimisation.csv", header=None)
+
+
+print("First 5 Transactions:")
+print(df.head())
+
+transactions = []
+
+for i in range(len(df)):
+    transaction = df.iloc[i].dropna().tolist()
+    transactions.append(transaction)
+
+
+print("\nSample Transactions:")
+for i in range(5):
+    print(transactions[i])
+
+te = TransactionEncoder()
+
+te_array = te.fit(transactions).transform(transactions)
+
+basket = pd.DataFrame(
+    te_array,
+    columns=te.columns_
+)
+
+print("\nOne-Hot Encoded Data:")
+print(basket.head())
+
+
+frequent_itemsets = apriori(
+    basket,
+    min_support=0.01,
+    use_colnames=True
+)
+
+
+print("\nFrequent Itemsets:")
+print(frequent_itemsets.sort_values(
+    by='support',
+    ascending=False
+).head(20))
+
+
+rules = association_rules(
+    frequent_itemsets,
+    metric="confidence",
+    min_threshold=0.2
+)
+
+
+rules = rules[
+    ['antecedents', 'consequents',
+     'support', 'confidence', 'lift']
+]
+
+
+rules = rules.sort_values(
+    by='confidence',
+    ascending=False
+)
+
+print("\nAssociation Rules:")
+print(rules.head(20))
+
